@@ -28,7 +28,12 @@ const supabaseService = new SupabaseService()
 app.use(helmet())
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? ['https://onbyte-print.netlify.app', 'https://edutext-pro.netlify.app', 'https://onbyte-print-frontend.onrender.com'] 
+    ? [
+        'https://onbyte-print.netlify.app', 
+        'https://edutext-pro.netlify.app', 
+        'https://onbyte-print-frontend.onrender.com',
+        'https://mingukang0719.github.io'
+      ] 
     : true, // 개발 환경에서는 모든 오리진 허용
   credentials: true
 }))
@@ -300,7 +305,7 @@ app.post('/api/generate', async (req, res) => {
 app.use('/api/admin/templates', templateRoutes)
 
 // AI generation routes
-app.use('/api/admin/ai', aiGenerationRoutes)
+app.use('/api/ai', aiGenerationRoutes)
 
 // Admin login endpoint with Supabase integration
 app.post('/api/admin/login', async (req, res) => {

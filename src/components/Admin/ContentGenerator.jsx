@@ -54,7 +54,7 @@ const ContentGenerator = () => {
     setIsGenerating(true)
     try {
       const token = localStorage.getItem('adminToken')
-      const response = await fetch('/api/admin/ai/generate-from-template', {
+      const response = await fetch('/api/ai/generate-from-template', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
