@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Lock, User } from 'lucide-react'
+import { apiEndpoints } from '../config/api'
 
 export default function AdminLogin() {
   const [email, setEmail] = useState('')
@@ -15,14 +16,25 @@ export default function AdminLogin() {
     setError('')
 
     try {
-      // 임시 로그인 로직
-      if (email === 'admin@inblanq.com' && password === '2025') {
+      const response = await fetch(apiEndpoints.adminLogin, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email, password })
+      })
+
+      const data = await response.json()
+
+      if (data.success && data.token) {
+        localStorage.setItem('adminToken', data.token)
         localStorage.setItem('isAdmin', 'true')
         navigate('/admin')
       } else {
-        setError('이메일 또는 비밀번호가 올바르지 않습니다.')
+        setError(data.error || '이메일 또는 비밀번호가 올바르지 않습니다.')
       }
     } catch (err) {
+      console.error('Login error:', err)
       setError('로그인 중 오류가 발생했습니다.')
     } finally {
       setIsLoading(false)

@@ -50,7 +50,7 @@ export default function AdminDashboardWithRoutes() {
                 isActive('/admin/dashboard') ? 'bg-indigo-50 text-indigo-600' : 'text-gray-600 hover:bg-gray-50'
               }`}
             >
-              <ChartBar className="h-5 w-5 mr-3" />
+              <BarChart className="h-5 w-5 mr-3" />
               대시보드
             </Link>
             

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { apiEndpoints, apiFetch } from '../../config/api'
 
 const ContentGenerator = () => {
   const [templates, setTemplates] = useState([])
@@ -16,12 +17,7 @@ const ContentGenerator = () => {
 
   const fetchTemplates = async () => {
     try {
-      const token = localStorage.getItem('adminToken')
-      const response = await fetch('/api/admin/templates', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      })
+      const response = await apiFetch(apiEndpoints.adminTemplates)
       const data = await response.json()
       if (data.success) {
         setTemplates(data.templates)
@@ -53,13 +49,8 @@ const ContentGenerator = () => {
 
     setIsGenerating(true)
     try {
-      const token = localStorage.getItem('adminToken')
-      const response = await fetch('/api/ai/generate-from-template', {
+      const response = await apiFetch(apiEndpoints.generateFromTemplate, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
         body: JSON.stringify({
           templateId: selectedTemplate.id,
           variables,
@@ -67,15 +58,20 @@ const ContentGenerator = () => {
         })
       })
 
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`)
+      }
+
       const data = await response.json()
       if (data.success) {
         setGeneratedContent(data)
       } else {
-        alert('생성 실패: ' + data.error)
+        alert('AI 생성에 실패했습니다: ' + (data.error || data.message))
       }
     } catch (error) {
       console.error('Generation error:', error)
-      alert('생성 중 오류가 발생했습니다')
+      alert('AI 생성에 실패했습니다: ' + error.message)
     } finally {
       setIsGenerating(false)
     }
