@@ -4,7 +4,9 @@
     "allow": [
       "Bash(git commit:*)",
       "Bash(git rm:*)",
-      "Bash(true)"
+      "Bash(true)",
+      "Bash(rm:*)",
+      "Bash(del nul)"
     ],
     "deny": []
   }
