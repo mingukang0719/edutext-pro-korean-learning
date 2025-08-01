@@ -1,13 +1,31 @@
 // Frontend AI Service
-import config from '../config'
+import config from '../config.js'
+import DemoService from './demoService.js'
 
 class AIService {
   constructor() {
     this.baseURL = config.apiUrl
+    this.demoService = new DemoService()
+    this.isDemo = config.demo || config.apiUrl === 'demo'
   }
 
   async generateContent(request) {
     try {
+      // 데모 모드인 경우 데모 서비스 사용
+      if (this.isDemo) {
+        console.log('🎯 데모 모드: 모의 AI 응답 사용')
+        return await this.demoService.generateContent(
+          request.provider || 'claude',
+          request.contentType || 'reading',
+          request.prompt,
+          {
+            targetAge: request.targetAge,
+            difficulty: request.difficulty,
+            contentLength: request.contentLength
+          }
+        )
+      }
+
       const response = await fetch(`${this.baseURL}/api/ai/generate`, {
         method: 'POST',
         headers: {
