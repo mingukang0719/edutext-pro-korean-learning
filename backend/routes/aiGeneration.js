@@ -103,23 +103,34 @@ router.post('/generate-from-template', adminAuthMiddleware, requirePermission('g
 
   } catch (error) {
     console.error('Generation error:', error)
+    console.error('Error stack:', error.stack)
+    console.error('Environment check:', {
+      hasClaudeKey: !!process.env.CLAUDE_API_KEY,
+      claudeKeyLength: process.env.CLAUDE_API_KEY?.length,
+      provider: req.body.provider
+    })
     
     // 실패 로그 저장
-    await supabase.from('ai_generation_logs').insert({
-      user_id: req.user.id,
-      template_id: req.body.templateId,
-      prompt: 'Failed to generate',
-      content_type: 'unknown',
-      ai_provider: req.body.provider || 'claude',
-      generated_content: null,
-      error_message: error.message,
-      success: false
-    })
+    try {
+      await supabase.from('ai_generation_logs').insert({
+        user_id: req.user.id,
+        template_id: req.body.templateId,
+        prompt: 'Failed to generate',
+        content_type: 'unknown',
+        ai_provider: req.body.provider || 'claude',
+        generated_content: null,
+        error_message: error.message,
+        success: false
+      })
+    } catch (logError) {
+      console.error('Failed to save error log:', logError)
+    }
 
     res.status(500).json({ 
       success: false,
       error: 'Failed to generate content',
-      message: error.message 
+      message: error.message,
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
     })
   }
 })

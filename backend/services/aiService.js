@@ -1,9 +1,19 @@
 // AI 서비스 - Gemini와 Claude 선택형
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import Anthropic from '@anthropic-ai/sdk'
+import dotenv from 'dotenv'
+
+// 환경변수 로드
+dotenv.config()
 
 class AIService {
   constructor() {
+    console.log('AIService constructor - Environment check:', {
+      hasClaudeKey: !!process.env.CLAUDE_API_KEY,
+      claudeKeyPrefix: process.env.CLAUDE_API_KEY?.substring(0, 10),
+      hasGeminiKey: !!process.env.GEMINI_API_KEY
+    })
+    
     // Google Gemini 설정
     if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== 'your_gemini_api_key_here') {
       this.gemini = new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
@@ -106,7 +116,7 @@ class AIService {
       }
 
       const message = await this.claude.messages.create({
-        model: 'claude-3-5-sonnet-20241022',
+        model: 'claude-3-sonnet-20240229',
         max_tokens: 4096,
         temperature: 0.7,
         messages: [{
