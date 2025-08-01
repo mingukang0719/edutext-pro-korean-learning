@@ -7,7 +7,15 @@
       "Bash(true)",
       "Bash(rm:*)",
       "Bash(del nul)",
-      "mcp__sequential__sequentialthinking"
+      "mcp__sequential__sequentialthinking",
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_click",
+      "mcp__playwright__browser_snapshot",
+      "mcp__playwright__browser_type",
+      "mcp__playwright__browser_tab_select",
+      "mcp__playwright__browser_tab_list",
+      "mcp__playwright__browser_wait_for",
+      "mcp__playwright__browser_close"
     ],
     "deny": []
   }
