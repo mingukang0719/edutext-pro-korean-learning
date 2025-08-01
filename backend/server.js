@@ -101,12 +101,12 @@ app.post('/api/admin/login', async (req, res) => {
     const { email, password } = req.body
 
     // Simple admin check (in production, use proper authentication)
-    if (email === 'admin@edutext.pro' && password === 'EduTextAdmin2024!') {
+    if (email === 'admin@inblanq.com' && password === '2025') {
       res.json({
         success: true,
         token: 'admin-token-placeholder',
         user: {
-          email: 'admin@edutext.pro',
+          email: 'admin@inblanq.com',
           role: 'admin'
         }
       })
