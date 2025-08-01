@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import jwt from 'jsonwebtoken'
 import dotenv from 'dotenv'
 
 // Load environment variables
@@ -17,40 +18,51 @@ export const adminAuthMiddleware = async (req, res, next) => {
       return res.status(401).json({ error: 'No token provided' })
     }
 
-    // Supabase 토큰 검증
-    const { data: { user }, error } = await supabase.auth.getUser(token)
-    if (error || !user) {
+    // JWT 토큰 검증
+    let decoded
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET)
+    } catch (jwtError) {
+      console.error('JWT verification error:', jwtError)
       return res.status(401).json({ error: 'Invalid token' })
     }
 
-    // 관리자 권한 확인
-    const { data: adminUser, error: adminError } = await supabase
-      .from('admin_users')
-      .select(`
-        *,
-        admin_roles (
-          role_name,
-          permissions
-        )
-      `)
-      .eq('id', user.id)
-      .eq('is_active', true)
-      .single()
+    // JWT 토큰에서 사용자 정보 사용
+    const userId = decoded.userId
+    const userEmail = decoded.email
+    const userRole = decoded.role
 
-    if (adminError || !adminUser) {
-      return res.status(403).json({ error: 'Not authorized as admin' })
+    // 관리자 권한 확인 (간단한 체크)
+    if (userRole !== 'admin') {
+      // Supabase에서 관리자 권한 확인
+      const { data: adminUser, error: adminError } = await supabase
+        .from('admin_users')
+        .select(`
+          *,
+          admin_roles (
+            role_name,
+            permissions
+          )
+        `)
+        .eq('id', userId)
+        .eq('is_active', true)
+        .single()
+
+      if (adminError || !adminUser) {
+        console.error('Admin check error:', adminError)
+        return res.status(403).json({ error: 'Not authorized as admin' })
+      }
+
+      // 요청 객체에 사용자 정보 추가
+      req.user = { id: userId, email: userEmail }
+      req.adminRole = adminUser.admin_roles?.role_name
+      req.permissions = adminUser.admin_roles?.permissions
+    } else {
+      // JWT에 admin role이 있는 경우
+      req.user = { id: userId, email: userEmail }
+      req.adminRole = 'admin'
+      req.permissions = { all: true }
     }
-
-    // 요청 객체에 사용자 정보 추가
-    req.user = user
-    req.adminRole = adminUser.admin_roles.role_name
-    req.permissions = adminUser.admin_roles.permissions
-
-    // 마지막 로그인 시간 업데이트
-    await supabase
-      .from('admin_users')
-      .update({ last_login: new Date().toISOString() })
-      .eq('id', user.id)
 
     next()
   } catch (error) {
