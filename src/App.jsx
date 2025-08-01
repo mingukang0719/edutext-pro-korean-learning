@@ -6,8 +6,11 @@ import AdminDashboard from './pages/AdminDashboard'
 import AdminDashboardWithRoutes from './pages/AdminDashboardWithRoutes'
 
 function App() {
+  // GitHub Pages 배포를 위한 basename 설정
+  const basename = process.env.NODE_ENV === 'production' ? '/edutext-pro-korean-learning' : '/'
+  
   return (
-    <Router>
+    <Router basename={basename}>
       <div className="min-h-screen bg-gray-50">
         <Routes>
           <Route path="/" element={<HomePage />} />

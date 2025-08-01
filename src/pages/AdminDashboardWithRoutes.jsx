@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom'
-import { BarChart3, Users, FileText, Settings, LogOut, FileCode, Sparkles, History, ChartBar } from 'lucide-react'
+import { BarChart3, Users, FileText, Settings, LogOut, FileCode, Sparkles, History, BarChart } from 'lucide-react'
 import TemplateManager from '../components/Admin/TemplateManager'
 import ContentGenerator from '../components/Admin/ContentGenerator'
 
