@@ -44,7 +44,8 @@
       "Bash(git branch:*)",
       "Bash(git push:*)",
       "mcp__playwright__browser_wait_for",
-      "mcp__playwright__browser_evaluate"
+      "mcp__playwright__browser_evaluate",
+      "mcp__supabase-mcp__list_projects"
     ],
     "deny": []
   }
