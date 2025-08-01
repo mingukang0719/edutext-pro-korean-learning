@@ -4,9 +4,10 @@ import dotenv from 'dotenv'
 import helmet from 'helmet'
 import rateLimit from 'express-rate-limit'
 import { createClient } from '@supabase/supabase-js'
+import SupabaseService from './services/supabaseService.js'
 
 // Load environment variables
-dotenv.config({ path: '../.env' })
+dotenv.config()
 
 const app = express()
 const PORT = process.env.PORT || 3001
@@ -17,12 +18,15 @@ const supabase = createClient(
   process.env.SUPABASE_ANON_KEY
 )
 
+// Initialize Supabase Service
+const supabaseService = new SupabaseService()
+
 // Middleware
 app.use(helmet())
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
     ? ['https://onbyte-print.netlify.app', 'https://edutext-pro.netlify.app', 'https://onbyte-print-frontend.onrender.com'] 
-    : ['http://localhost:3000', 'http://localhost:5173'],
+    : true, // 개발 환경에서는 모든 오리진 허용
   credentials: true
 }))
 
@@ -37,13 +41,27 @@ app.use('/api/', limiter)
 app.use(express.json({ limit: '10mb' }))
 app.use(express.urlencoded({ extended: true }))
 
-// Health check endpoint
-app.get('/api/health', (req, res) => {
-  res.json({ 
-    status: 'OK', 
-    timestamp: new Date().toISOString(),
-    version: '1.0.0'
-  })
+// Health check endpoint with Supabase status
+app.get('/api/health', async (req, res) => {
+  try {
+    const supabaseHealth = await supabaseService.healthCheck()
+    
+    res.json({ 
+      status: 'OK', 
+      timestamp: new Date().toISOString(),
+      version: '1.0.0',
+      services: {
+        supabase: supabaseHealth.success ? 'connected' : 'disconnected',
+        database: supabaseHealth.supabase
+      }
+    })
+  } catch (error) {
+    res.status(500).json({
+      status: 'ERROR',
+      timestamp: new Date().toISOString(),
+      error: error.message
+    })
+  }
 })
 
 // AI Content Generation endpoint
@@ -77,6 +95,28 @@ app.post('/api/ai/generate', async (req, res) => {
       prompt,
       userId
     })
+
+    // Supabase에 생성 로그 저장
+    if (result.success && userId) {
+      try {
+        await supabaseService.logAIGeneration(
+          userId,
+          provider,
+          contentType,
+          prompt,
+          result.content,
+          {
+            targetAge,
+            difficulty,
+            contentLength,
+            tokensUsed: result.tokensUsed
+          }
+        )
+      } catch (logError) {
+        console.error('Failed to log AI generation:', logError)
+        // 로깅 실패는 치명적이지 않으므로 계속 진행
+      }
+    }
 
     res.json(result)
 
@@ -253,47 +293,55 @@ app.post('/api/generate', async (req, res) => {
   }
 })
 
-// Admin login endpoint
+// Admin login endpoint with Supabase integration
 app.post('/api/admin/login', async (req, res) => {
   try {
     const { email, password } = req.body
 
-    // Simple admin check (in production, use proper authentication)
-    if (email === 'admin@inblanq.com' && password === '2025') {
-      res.json({
-        success: true,
-        token: 'admin-token-placeholder',
-        user: {
-          email: 'admin@inblanq.com',
-          role: 'admin'
-        }
-      })
-    } else {
-      res.status(401).json({ error: 'Invalid credentials' })
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password are required' })
     }
+
+    // Use Supabase authentication
+    const result = await supabaseService.authenticateUser(email, password)
+    
+    res.json({
+      success: true,
+      token: result.token,
+      user: result.user
+    })
 
   } catch (error) {
     console.error('Login error:', error)
-    res.status(500).json({ error: 'Login failed' })
+    res.status(401).json({ 
+      success: false,
+      error: error.message || 'Invalid credentials' 
+    })
   }
 })
 
-// Admin stats endpoint
+// Admin stats endpoint with real Supabase data
 app.get('/api/admin/stats', async (req, res) => {
   try {
-    // TODO: Get real stats from database
-    const stats = {
-      totalUsers: 1245,
-      totalContent: 567,
-      todayGenerated: 89,
-      activeUsers: 234
-    }
-
-    res.json(stats)
+    const stats = await supabaseService.getUsageStats()
+    
+    res.json({
+      success: true,
+      stats: {
+        totalGenerations: stats.totalGenerations,
+        totalTokens: stats.totalTokens,
+        providerBreakdown: stats.byProvider,
+        contentTypeBreakdown: stats.byContentType,
+        dailyUsage: stats.dailyUsage
+      }
+    })
 
   } catch (error) {
     console.error('Stats error:', error)
-    res.status(500).json({ error: 'Failed to fetch stats' })
+    res.status(500).json({ 
+      success: false,
+      error: 'Failed to fetch stats' 
+    })
   }
 })
 

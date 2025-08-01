@@ -18,7 +18,26 @@
       "mcp__playwright__browser_close",
       "mcp__playwright__browser_take_screenshot",
       "mcp__playwright__browser_press_key",
-      "mcp__playwright__browser_evaluate"
+      "mcp__playwright__browser_evaluate",
+      "Bash(npm run dev:*)",
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_click",
+      "mcp__playwright__browser_type",
+      "mcp__playwright__browser_snapshot",
+      "mcp__playwright__browser_handle_dialog",
+      "mcp__playwright__browser_console_messages",
+      "Bash(npm start)",
+      "Bash(pkill:*)",
+      "Bash(taskkill:*)",
+      "Bash(powershell:*)",
+      "Bash(copy:*)",
+      "Bash(cp:*)",
+      "Bash(npm run restart:*)",
+      "Bash(wmic process where:*)",
+      "Bash(npm run build:*)",
+      "Bash(touch:*)",
+      "Bash(git init:*)",
+      "Bash(git add:*)"
     ],
     "deny": []
   }

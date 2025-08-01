@@ -1,26 +1,39 @@
 # Dependencies
 node_modules/
 */node_modules/
-**/node_modules/
 
-# Build outputs
+# Production builds
 dist/
 build/
-backend/dist/
 
 # Environment variables
 .env
 .env.local
 .env.production
-backend/.env
+.env.development
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
 
 # Logs
-logs/
+logs
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-backend/logs/
 
 # Runtime data
 pids
@@ -30,6 +43,9 @@ pids
 
 # Coverage directory used by tools like istanbul
 coverage/
+
+# nyc test coverage
+.nyc_output
 
 # Dependency directories
 jspm_packages/
@@ -46,30 +62,30 @@ jspm_packages/
 # Yarn Integrity file
 .yarn-integrity
 
+# dotenv environment variables file
+.env.test
+
 # parcel-bundler cache (https://parceljs.org/)
 .cache
 .parcel-cache
 
-# Vite cache
-.vite/
+# next.js build output
+.next
 
-# OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-desktop.ini
+# nuxt.js build output
+.nuxt
 
-# IDE files
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
+# vuepress build output
+.vuepress/dist
 
-# Temporary files
-tmp/
-temp/
+# Serverless directories
+.serverless
+
+# FuseBox cache
+.fusebox/
+
+# DynamoDB Local files
+.dynamodb/
+
+# Local development
+*.local

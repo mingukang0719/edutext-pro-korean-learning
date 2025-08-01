@@ -1,10 +1,8 @@
 services:
-  # Backend API
+  # Backend API D§
   - type: web
-    name: onbyte-print-backend
+    name: edutext-pro-backend
     env: node
-    region: oregon
-    plan: free
     buildCommand: cd backend && npm install
     startCommand: cd backend && npm start
     envVars:
@@ -13,39 +11,25 @@ services:
       - key: PORT
         value: 10000
       - key: SUPABASE_URL
-        fromDatabase:
-          name: supabase-config
-          property: url
+        value: https://xrjrddwrsasjifhghzfl.supabase.co
       - key: SUPABASE_ANON_KEY
-        fromDatabase:
-          name: supabase-config
-          property: anon_key
+        value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhyanJkZHdyc2FzamlmaGdoemZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI0MTg1NTIsImV4cCI6MjA2Nzk5NDU1Mn0.pAqrS-9NYXiUZ1lONXlDm8YK-c3zhZj2VIix0_Q36rw
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhyanJkZHdyc2FzamlmaGdoemZsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MjQxODU1MiwiZXhwIjoyMDY3OTk0NTUyfQ.r3X0g1-J7zxDP9sxE7DYiW_o2_78qMbVfdsqEYahd-c
       - key: API_KEY_ENCRYPTION_SECRET
-        generateValue: true
+        value: EduTextPro2024SecretKey!@#$%^&*()1234567890
       - key: JWT_SECRET
-        generateValue: true
+        value: EduTextProJWTSecret2024!@#$%^&*()
+      - key: GEMINI_API_KEY
+        value: your_gemini_api_key_here
+      - key: CLAUDE_API_KEY
+        value: your_claude_api_key_here
 
-  # Frontend Static Site
+  # `∏‘‹  ¨t∏  
   - type: static
-    name: onbyte-print-frontend
-    env: static
-    region: oregon
-    plan: free
-    buildCommand: npm run build
+    name: edutext-pro-frontend
+    buildCommand: npm install && npm run build
     staticPublishPath: ./dist
     envVars:
-      - key: VITE_API_BASE_URL
-        value: https://onbyte-print-backend.onrender.com/api
-      - key: VITE_SUPABASE_URL
-        fromDatabase:
-          name: supabase-config
-          property: url
-      - key: VITE_SUPABASE_ANON_KEY
-        fromDatabase:
-          name: supabase-config
-          property: anon_key
-
-databases:
-  - name: supabase-config
-    databaseName: config
-    user: config_user
+      - key: NODE_ENV
+        value: production

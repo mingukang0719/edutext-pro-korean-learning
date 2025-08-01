@@ -16,7 +16,7 @@ export default function AdminLogin() {
 
     try {
       // 임시 로그인 로직
-      if (email === 'admin@edutext.pro' && password === 'EduTextAdmin2024!') {
+      if (email === 'admin@inblanq.com' && password === '2025') {
         localStorage.setItem('isAdmin', 'true')
         navigate('/admin')
       } else {
@@ -60,7 +60,7 @@ export default function AdminLogin() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="appearance-none block w-full px-3 py-2 pl-10 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                  placeholder="admin@edutext.pro"
+                  placeholder="admin@inblanq.com"
                 />
                 <User className="h-5 w-5 text-gray-400 absolute left-3 top-2.5" />
               </div>

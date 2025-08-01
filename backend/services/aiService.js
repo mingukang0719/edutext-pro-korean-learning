@@ -5,36 +5,41 @@ import Anthropic from '@anthropic-ai/sdk'
 class AIService {
   constructor() {
     // Google Gemini 설정
-    this.gemini = new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
-    this.geminiModel = this.gemini.getGenerativeModel({ 
-      model: 'gemini-1.5-pro',
-      generationConfig: {
-        temperature: 0.7,
-        topP: 0.8,
-        topK: 40,
-        maxOutputTokens: 4096,
-      }
-    })
+    if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== 'your_gemini_api_key_here') {
+      this.gemini = new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
+      this.geminiModel = this.gemini.getGenerativeModel({ 
+        model: 'gemini-1.5-pro',
+        generationConfig: {
+          temperature: 0.7,
+          topP: 0.8,
+          topK: 40,
+          maxOutputTokens: 4096,
+        }
+      })
+    }
 
     // Anthropic Claude 설정
-    this.claude = new Anthropic({
-      apiKey: process.env.CLAUDE_API_KEY
-    })
+    if (process.env.CLAUDE_API_KEY && process.env.CLAUDE_API_KEY !== 'your_claude_api_key_here') {
+      this.claude = new Anthropic({
+        apiKey: process.env.CLAUDE_API_KEY
+      })
+    }
   }
 
   async generateContent(request) {
     const {
       provider = 'gemini',
-      contentType = 'vocabulary',
+      contentType = 'reading',
       difficulty = 'intermediate',
-      targetAge = 'adult',
+      targetAge = 'elem1',
+      contentLength = '400',
       prompt,
       userId
     } = request
 
     try {
       let result
-      const enhancedPrompt = this.buildKoreanLearningPrompt(prompt, contentType, { difficulty, targetAge })
+      const enhancedPrompt = this.buildKoreanLearningPrompt(prompt, contentType, { difficulty, targetAge, contentLength })
 
       if (provider === 'gemini') {
         result = await this.generateWithGemini(enhancedPrompt)
@@ -63,6 +68,11 @@ class AIService {
 
   async generateWithGemini(prompt) {
     try {
+      // API 키가 없거나 테스트 키인 경우 또는 클라이언트가 초기화되지 않은 경우 모의 응답 제공
+      if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY === 'your_gemini_api_key_here' || !this.gemini) {
+        return this.getMockResponse('gemini', prompt)
+      }
+
       const result = await this.geminiModel.generateContent(prompt)
       const response = await result.response
       const text = response.text()
@@ -90,6 +100,11 @@ class AIService {
 
   async generateWithClaude(prompt) {
     try {
+      // API 키가 없거나 테스트 키인 경우 또는 클라이언트가 초기화되지 않은 경우 모의 응답 제공
+      if (!process.env.CLAUDE_API_KEY || process.env.CLAUDE_API_KEY === 'your_claude_api_key_here' || !this.claude) {
+        return this.getMockResponse('claude', prompt)
+      }
+
       const message = await this.claude.messages.create({
         model: 'claude-3-5-sonnet-20241022',
         max_tokens: 4096,
@@ -124,14 +139,20 @@ class AIService {
 
   buildKoreanLearningPrompt(userPrompt, contentType, options) {
     const basePrompts = {
-      vocabulary: `한국어 어휘 학습 자료를 생성해주세요. 
-새로운 단어들의 정의, 예문, 품사, 활용법을 포함해야 합니다.`,
+      vocabulary: `지문에서 어려운 어휘를 추출하고 분석해주세요. 
+각 어휘의 의미, 유의어, 반의어, 난이도를 포함해야 합니다.`,
 
       grammar: `한국어 문법 학습 자료를 생성해주세요.
 문법 규칙의 명확한 설명, 다양한 예문, 주의사항을 포함해야 합니다.`,
 
-      reading: `한국어 읽기 학습 자료를 생성해주세요.
-적절한 길이의 읽기 지문과 이해 문제를 포함해야 합니다.`,
+      reading: `한국어 읽기 지문을 생성해주세요.
+해당 연령과 수준에 맞는 지문을 정확한 글자 수로 작성해야 합니다.`,
+
+      questions: `지문 기반 서술형 문제를 생성해주세요.
+맥락 추론형과 내용 이해형 문제를 포함해야 합니다.`,
+
+      answers: `문제에 대한 상세한 해설을 작성해주세요.
+정답, 해설, 채점 기준, 학습 팁을 포함해야 합니다.`,
 
       quiz: `한국어 학습 퀴즈를 생성해주세요.
 다양한 유형의 문제와 명확한 정답, 해설을 포함해야 합니다.`
@@ -144,10 +165,18 @@ class AIService {
     }
 
     const ageGuides = {
-      child: '어린이용 (재미있고 쉬운 예시, 그림이나 게임 요소 포함)',
-      teen: '청소년용 (학교생활, 친구 관계 등 관련 예시)',
-      adult: '성인용 (직장생활, 사회생활 등 실용적 예시)',
-      senior: '시니어용 (천천히, 자세히, 반복 설명 위주)'
+      elem1: '초등학교 1학년 (7세)',
+      elem2: '초등학교 2학년 (8세)', 
+      elem3: '초등학교 3학년 (9세)',
+      elem4: '초등학교 4학년 (10세)',
+      elem5: '초등학교 5학년 (11세)',
+      elem6: '초등학교 6학년 (12세)',
+      middle1: '중학교 1학년 (13세)',
+      middle2: '중학교 2학년 (14세)',
+      middle3: '중학교 3학년 (15세)',
+      high1: '고등학교 1학년 (16세)',
+      high2: '고등학교 2학년 (17세)',
+      high3: '고등학교 3학년 (18세)'
     }
 
     return `${basePrompts[contentType] || basePrompts.vocabulary}
@@ -157,10 +186,69 @@ class AIService {
 설정:
 - 난이도: ${options.difficulty} (${difficultyGuides[options.difficulty]})
 - 대상 연령: ${options.targetAge} (${ageGuides[options.targetAge]})
+- 글자 수: 정확히 ${options.contentLength}자
+
+${contentType === 'reading' ? `**중요**: 지문은 반드시 ${options.contentLength}자로 작성해주세요. 해당 학년 수준에 맞는 어휘와 문체를 사용하여 학생이 이해할 수 있는 내용으로 만들어주세요.` : ''}
 
 다음 JSON 형식으로 정확히 응답해주세요:
 
-{
+${this.getJsonFormat(contentType)}
+
+중요: 반드시 유효한 JSON 형식으로만 응답하고, 추가 설명은 JSON 내부에 포함시켜주세요.`
+  }
+
+  getJsonFormat(contentType) {
+    switch (contentType) {
+      case 'vocabulary':
+        return `{
+  "title": "어휘 분석 결과",
+  "vocabularyList": [
+    {
+      "word": "어휘",
+      "meaning": "한자어 기반 쉬운 풀이",
+      "synonyms": ["유의어1", "유의어2"],
+      "antonyms": ["반의어1", "반의어2"],
+      "difficulty": "★★★★☆",
+      "example": "예문"
+    }
+  ]
+}`
+
+      case 'questions':
+        return `{
+  "title": "서술형 문제",
+  "questions": [
+    {
+      "type": "맥락 추론형",
+      "question": "문제 내용",
+      "answerSpace": 3,
+      "points": 10
+    },
+    {
+      "type": "내용 이해형", 
+      "question": "문제 내용",
+      "answerSpace": 4,
+      "points": 10
+    }
+  ]
+}`
+
+      case 'answers':
+        return `{
+  "title": "문제 해설",
+  "answers": [
+    {
+      "questionNumber": 1,
+      "correctAnswer": "예시 정답",
+      "explanation": "상세한 해설",
+      "gradingCriteria": ["채점 기준 1", "채점 기준 2"],
+      "tips": "학습 팁"
+    }
+  ]
+}`
+
+      default:
+        return `{
   "title": "학습 자료 제목",
   "description": "학습 자료에 대한 간단한 설명",
   "mainContent": {
@@ -191,9 +279,8 @@ class AIService {
   "additionalNotes": [
     "추가 학습 팁이나 주의사항"
   ]
-}
-
-중요: 반드시 유효한 JSON 형식으로만 응답하고, 추가 설명은 JSON 내부에 포함시켜주세요.`
+}`
+    }
   }
 
   parseUnstructuredText(text) {
@@ -252,6 +339,96 @@ class AIService {
     }
 
     return status
+  }
+
+  // 모의 응답 생성 (API 키가 없을 때 사용)
+  getMockResponse(provider, prompt) {
+    const isReading = prompt.includes('읽기 지문') || prompt.includes('지문을')
+    const isVocabulary = prompt.includes('어휘') || prompt.includes('vocabulary')
+    const isQuestions = prompt.includes('문제') || prompt.includes('questions')
+    const isAnswers = prompt.includes('해설') || prompt.includes('answers')
+
+    let mockContent
+
+    if (isReading) {
+      mockContent = {
+        title: "봄에 피는 꽃들",
+        description: "초등학교 1학년을 위한 봄 꽃 이야기",
+        mainContent: {
+          introduction: "따뜻한 봄이 오면 여러 가지 예쁜 꽃들이 피어납니다. 개나리는 노란색으로 먼저 피고, 진달래는 분홍색으로 예쁘게 핍니다. 벚꽃은 하얀색과 분홍색으로 피어서 마치 눈이 내린 것 같아요. 꽃들은 우리에게 봄이 왔다고 알려주는 친구들입니다. 꽃들을 보면 마음이 기뻐집니다. 우리는 꽃을 소중히 여겨야 해요. 꽃을 꺾지 말고 예쁘게 구경만 해야 합니다. 꽃들도 우리처럼 살아있는 생명이기 때문입니다. 봄에는 가족과 함께 꽃구경을 가면 좋겠어요. 공원이나 산에 가서 여러 가지 꽃들을 찾아보세요. 꽃의 색깔과 모양을 자세히 관찰해보면 정말 신기합니다. 자연은 우리에게 아름다운 선물을 주는 것 같아요.",
+          keyPoints: [
+            "봄에는 여러 가지 꽃들이 핀다",
+            "꽃마다 색깔과 모양이 다르다", 
+            "꽃은 생명이므로 소중히 여겨야 한다"
+          ],
+          examples: [
+            {
+              korean: "개나리가 노랗게 피었어요.",
+              explanation: "봄에 가장 먼저 피는 노란 꽃"
+            }
+          ]
+        }
+      }
+    } else if (isVocabulary) {
+      mockContent = {
+        title: "어휘 분석 결과",
+        vocabularyList: [
+          {
+            word: "관찰",
+            meaning: "자세히 살펴보는 것",
+            synonyms: ["구경", "살피기"],
+            antonyms: ["무시", "소홀"],
+            difficulty: "★★★☆☆",
+            example: "꽃을 관찰해보세요."
+          },
+          {
+            word: "생명",
+            meaning: "살아있는 것",
+            synonyms: ["목숨", "삶"],
+            antonyms: ["죽음"],
+            difficulty: "★★☆☆☆", 
+            example: "꽃도 생명이에요."
+          }
+        ]
+      }
+    } else if (isQuestions) {
+      mockContent = {
+        title: "서술형 문제",
+        questions: [
+          {
+            type: "내용 이해형",
+            question: "봄에 피는 꽃의 종류를 3가지 써보세요.",
+            answerSpace: 3,
+            points: 10
+          },
+          {
+            type: "맥락 추론형", 
+            question: "글쓴이가 꽃을 꺾지 말라고 하는 이유를 써보세요.",
+            answerSpace: 4,
+            points: 15
+          }
+        ]
+      }
+    } else if (isAnswers) {
+      mockContent = {
+        title: "문제 해설",
+        answers: [
+          {
+            questionNumber: 1,
+            correctAnswer: "개나리, 진달래, 벚꽃",
+            explanation: "지문에서 봄에 피는 꽃으로 개나리(노란색), 진달래(분홍색), 벚꽃(하얀색, 분홍색)을 제시했습니다.",
+            gradingCriteria: ["3가지 꽃 이름 정확히 쓰기", "맞춤법 정확성"],
+            tips: "지문을 차근차근 읽으며 꽃 이름을 찾아보세요."
+          }
+        ]
+      }
+    }
+
+    return {
+      content: mockContent,
+      provider: provider,
+      tokensUsed: 100
+    }
   }
 }
 
