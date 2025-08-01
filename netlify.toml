@@ -9,3 +9,12 @@
   from = "/*"
   to = "/index.html"
   status = 200
+
+[context.production.environment]
+  VITE_API_BASE_URL = "https://onbyte-print-backend.railway.app/api"
+
+[context.deploy-preview.environment]
+  VITE_API_BASE_URL = "https://onbyte-print-backend.railway.app/api"
+
+[context.branch-deploy.environment]
+  VITE_API_BASE_URL = "https://onbyte-print-backend.railway.app/api"

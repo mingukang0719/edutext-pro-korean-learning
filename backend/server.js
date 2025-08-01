@@ -21,7 +21,7 @@ const supabase = createClient(
 app.use(helmet())
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? ['https://edutext-pro.netlify.app'] 
+    ? ['https://onbyte-print.netlify.app', 'https://edutext-pro.netlify.app'] 
     : ['http://localhost:3000', 'http://localhost:5173'],
   credentials: true
 }))
@@ -46,7 +46,179 @@ app.get('/api/health', (req, res) => {
   })
 })
 
-// Generate text endpoint (placeholder)
+// AI Content Generation endpoint
+app.post('/api/ai/generate', async (req, res) => {
+  try {
+    const { 
+      provider = 'gemini',
+      contentType = 'vocabulary',
+      difficulty = 'intermediate', 
+      targetAge = 'adult',
+      prompt,
+      userId 
+    } = req.body
+
+    if (!prompt) {
+      return res.status(400).json({ 
+        success: false,
+        error: 'Prompt is required' 
+      })
+    }
+
+    // AI 서비스 동적 import (실제 구현에서는 상단에서 import)
+    const AIService = (await import('./services/aiService.js')).default
+    const aiService = new AIService()
+
+    const result = await aiService.generateContent({
+      provider,
+      contentType,
+      difficulty,
+      targetAge,
+      prompt,
+      userId
+    })
+
+    res.json(result)
+
+  } catch (error) {
+    console.error('AI Generation error:', error)
+    res.status(500).json({ 
+      success: false,
+      error: 'AI 콘텐츠 생성에 실패했습니다',
+      message: error.message 
+    })
+  }
+})
+
+// AI Provider Status endpoint
+app.get('/api/ai/status', async (req, res) => {
+  try {
+    const AIService = (await import('./services/aiService.js')).default
+    const aiService = new AIService()
+    
+    const status = await aiService.checkProviderStatus()
+    
+    res.json({
+      success: true,
+      status
+    })
+  } catch (error) {
+    console.error('AI Status error:', error)
+    res.status(500).json({
+      success: false,
+      error: 'AI 상태 확인에 실패했습니다'
+    })
+  }
+})
+
+// PDF Generation endpoint
+app.post('/api/pdf/generate', async (req, res) => {
+  try {
+    const { title, blocks } = req.body
+
+    if (!blocks || !Array.isArray(blocks)) {
+      return res.status(400).json({ 
+        success: false,
+        error: 'Blocks array is required' 
+      })
+    }
+
+    // PDF 서비스 동적 import
+    const PDFService = (await import('./services/pdfService.js')).default
+    const pdfService = new PDFService()
+
+    const result = await pdfService.generatePDF({ title, blocks })
+
+    res.json(result)
+
+  } catch (error) {
+    console.error('PDF Generation error:', error)
+    res.status(500).json({ 
+      success: false,
+      error: 'PDF 생성에 실패했습니다',
+      message: error.message 
+    })
+  }
+})
+
+// PDF Download endpoint (HTML preview)
+app.get('/api/pdf/download/:fileName', async (req, res) => {
+  try {
+    const { fileName } = req.params
+    
+    // TODO: 실제 구현에서는 파일 저장소에서 HTML 파일을 읽어서 반환
+    // 현재는 기본 템플릿 반환
+    res.setHeader('Content-Type', 'text/html; charset=utf-8')
+    res.send(`
+      <!DOCTYPE html>
+      <html lang="ko">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>PDF Preview - ${fileName}</title>
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+        <style>
+          body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+            margin: 0;
+          }
+          .page {
+            width: 210mm;
+            min-height: 297mm;
+            background: white;
+            margin: 0 auto;
+            padding: 20mm;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+          }
+          .message {
+            text-align: center;
+            color: #666;
+            margin-top: 100px;
+          }
+          .button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Noto Sans KR', sans-serif;
+            margin-top: 20px;
+          }
+          @media print {
+            body { background: white; padding: 0; }
+            .page { box-shadow: none; margin: 0; }
+            .no-print { display: none !important; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="page">
+          <div class="message">
+            <h1>PDF 미리보기</h1>
+            <p>요청된 파일: ${fileName}</p>
+            <p>실제 콘텐츠가 표시될 위치입니다.</p>
+            <div class="no-print">
+              <button class="button" onclick="window.print()">PDF로 저장 / 인쇄</button>
+            </div>
+          </div>
+        </div>
+      </body>
+      </html>
+    `)
+
+  } catch (error) {
+    console.error('PDF Download error:', error)
+    res.status(500).json({
+      success: false,
+      error: 'PDF 다운로드에 실패했습니다'
+    })
+  }
+})
+
+// Legacy generate endpoint (for backward compatibility)
 app.post('/api/generate', async (req, res) => {
   try {
     const { text, userId } = req.body
@@ -55,7 +227,7 @@ app.post('/api/generate', async (req, res) => {
       return res.status(400).json({ error: 'Text is required' })
     }
 
-    // TODO: Implement AI text generation
+    // 기본 샘플 콘텐츠 반환
     const generatedContent = `생성된 교육 콘텐츠: ${text}에 대한 상세한 설명과 예시들...
 
 주요 개념:
@@ -64,21 +236,7 @@ app.post('/api/generate', async (req, res) => {
 3. 연습 문제와 해답
 4. 추가 학습 자료
 
-이 내용은 AI가 생성한 샘플 콘텐츠입니다.`
-
-    // Log generation (optional)
-    if (userId) {
-      await supabase
-        .from('content_logs')
-        .insert([
-          {
-            user_id: userId,
-            original_text: text,
-            generated_content: generatedContent,
-            generated_at: new Date().toISOString()
-          }
-        ])
-    }
+이 내용은 샘플 콘텐츠입니다. AI 생성을 위해서는 /api/ai/generate를 사용하세요.`
 
     res.json({
       success: true,

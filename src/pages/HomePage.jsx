@@ -1,114 +1,187 @@
-import { useState } from 'react'
-import { BookOpen, Brain, Target, Users } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { FileText, Palette, Zap, Download, ArrowRight, Sparkles } from 'lucide-react'
 
 export default function HomePage() {
-  const [text, setText] = useState('')
-  const [generatedContent, setGeneratedContent] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-
-  const handleGenerate = async () => {
-    if (!text.trim()) return
-    
-    setIsLoading(true)
-    try {
-      // AI 텍스트 생성 로직 (추후 구현)
-      setTimeout(() => {
-        setGeneratedContent(`생성된 교육 콘텐츠: ${text}에 대한 상세한 설명과 예시들...`)
-        setIsLoading(false)
-      }, 2000)
-    } catch (error) {
-      console.error('생성 실패:', error)
-      setIsLoading(false)
-    }
-  }
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       {/* Header */}
-      <header className="bg-white shadow-sm">
+      <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
+          <div className="flex justify-between items-center py-4">
             <div className="flex items-center">
-              <BookOpen className="h-8 w-8 text-indigo-600" />
-              <h1 className="ml-2 text-2xl font-bold text-gray-900">EduText Pro</h1>
+              <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-2 rounded-lg">
+                <FileText className="h-6 w-6 text-white" />
+              </div>
+              <h1 className="ml-3 text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                원바이트
+              </h1>
+              <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">
+                Print 모드
+              </span>
             </div>
-            <nav className="hidden md:flex space-x-8">
-              <a href="#features" className="text-gray-500 hover:text-gray-900">기능</a>
-              <a href="#about" className="text-gray-500 hover:text-gray-900">소개</a>
-              <a href="/admin/login" className="text-gray-500 hover:text-gray-900">관리자</a>
+            <nav className="hidden md:flex items-center space-x-8">
+              <a href="#features" className="text-gray-600 hover:text-gray-900 transition-colors">기능</a>
+              <a href="#templates" className="text-gray-600 hover:text-gray-900 transition-colors">템플릿</a>
+              <Link 
+                to="/admin/login" 
+                className="text-gray-600 hover:text-gray-900 transition-colors"
+              >
+                관리자
+              </Link>
+              <Link
+                to="/editor"
+                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg hover:shadow-lg transition-all duration-200"
+              >
+                시작하기
+              </Link>
             </nav>
           </div>
         </div>
       </header>
 
       {/* Hero Section */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="text-center">
-          <h2 className="text-4xl font-extrabold text-gray-900 sm:text-5xl">
-            AI로 만드는 <span className="text-indigo-600">스마트 교육</span>
-          </h2>
-          <p className="mt-4 text-xl text-gray-600">
-            인공지능 기술로 개인 맞춤형 교육 콘텐츠를 생성하세요
-          </p>
+      <main className="relative">
+        {/* Background decoration */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-200 rounded-full opacity-20 blur-3xl"></div>
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-200 rounded-full opacity-20 blur-3xl"></div>
         </div>
 
-        {/* Text Generation Section */}
-        <div className="mt-12 max-w-3xl mx-auto">
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">교육 콘텐츠 생성</h3>
-            <div className="space-y-4">
-              <textarea
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                placeholder="생성하고 싶은 교육 주제나 내용을 입력하세요..."
-                className="w-full h-32 p-3 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-              />
-              <button
-                onClick={handleGenerate}
-                disabled={isLoading || !text.trim()}
-                className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isLoading ? '생성 중...' : 'AI 콘텐츠 생성'}
-              </button>
-            </div>
+        <section className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16">
+          <div className="text-center">
+            <h2 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
+              AI로 만드는
+              <br />
+              <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                한국어 학습 자료
+              </span>
+            </h2>
+            <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">
+              A4 페이지에 최적화된 한국어 학습 자료를 AI로 생성하고,
+              <br />
+              드래그앤드롭으로 편집해서 PDF로 출력하세요
+            </p>
             
-            {generatedContent && (
-              <div className="mt-6 p-4 bg-gray-50 rounded-md">
-                <h4 className="font-medium text-gray-900 mb-2">생성된 콘텐츠:</h4>
-                <p className="text-gray-700">{generatedContent}</p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
+              <Link
+                to="/editor"
+                className="group bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-xl text-lg font-semibold hover:shadow-xl transition-all duration-300 flex items-center"
+              >
+                지금 시작하기
+                <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+              </Link>
+              <Link
+                to="/templates"
+                className="border-2 border-gray-300 text-gray-700 px-8 py-4 rounded-xl text-lg font-semibold hover:border-blue-300 hover:text-blue-600 transition-all duration-300"
+              >
+                템플릿 둘러보기
+              </Link>
+            </div>
+
+            {/* Demo Preview */}
+            <div className="relative max-w-4xl mx-auto">
+              <div className="bg-white rounded-2xl shadow-2xl p-8 border border-gray-200">
+                <div className="bg-gray-50 rounded-xl p-6 mb-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-gray-800">A4 에디터 미리보기</h3>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-3 h-3 bg-red-400 rounded-full"></div>
+                      <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
+                      <div className="w-3 h-3 bg-green-400 rounded-full"></div>
+                    </div>
+                  </div>
+                  <div className="bg-white rounded-lg p-4 shadow-inner">
+                    <div className="w-full h-48 bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center">
+                      <div className="text-center">
+                        <FileText className="h-12 w-12 text-gray-400 mx-auto mb-2" />
+                        <p className="text-gray-500">A4 페이지 (210mm × 297mm)</p>
+                        <p className="text-sm text-gray-400">드래그앤드롭으로 콘텐츠 배치</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-            )}
+            </div>
           </div>
-        </div>
+        </section>
 
         {/* Features Section */}
-        <div id="features" className="mt-20">
-          <h3 className="text-3xl font-bold text-center text-gray-900 mb-12">주요 기능</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <Brain className="h-12 w-12 text-indigo-600 mx-auto mb-4" />
-              <h4 className="text-xl font-semibold text-gray-900 mb-2">AI 기반 생성</h4>
-              <p className="text-gray-600">최신 AI 기술로 고품질 교육 콘텐츠를 자동 생성합니다.</p>
+        <section id="features" className="relative py-20 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <h3 className="text-4xl font-bold text-gray-900 mb-4">강력한 기능</h3>
+              <p className="text-xl text-gray-600">한국어 학습 자료 제작에 특화된 도구들</p>
             </div>
-            <div className="text-center">
-              <Target className="h-12 w-12 text-indigo-600 mx-auto mb-4" />
-              <h4 className="text-xl font-semibold text-gray-900 mb-2">맞춤형 학습</h4>
-              <p className="text-gray-600">개인의 학습 수준과 목표에 맞는 콘텐츠를 제공합니다.</p>
-            </div>
-            <div className="text-center">
-              <Users className="h-12 w-12 text-indigo-600 mx-auto mb-4" />
-              <h4 className="text-xl font-semibold text-gray-900 mb-2">협업 지원</h4>
-              <p className="text-gray-600">교육자와 학습자 간의 효과적인 협업을 지원합니다.</p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+              <div className="text-center group">
+                <div className="bg-gradient-to-br from-blue-100 to-blue-200 p-4 rounded-2xl w-16 h-16 mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                  <Sparkles className="h-8 w-8 text-blue-600 mx-auto" />
+                </div>
+                <h4 className="text-xl font-semibold text-gray-900 mb-2">AI 콘텐츠 생성</h4>
+                <p className="text-gray-600">Gemini와 Claude 중 선택하여 고품질 한국어 학습 콘텐츠를 생성</p>
+              </div>
+              
+              <div className="text-center group">
+                <div className="bg-gradient-to-br from-purple-100 to-purple-200 p-4 rounded-2xl w-16 h-16 mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                  <Palette className="h-8 w-8 text-purple-600 mx-auto" />
+                </div>
+                <h4 className="text-xl font-semibold text-gray-900 mb-2">A4 에디터</h4>
+                <p className="text-gray-600">정확한 A4 크기에서 블록 기반 드래그앤드롭 편집</p>
+              </div>
+              
+              <div className="text-center group">
+                <div className="bg-gradient-to-br from-green-100 to-green-200 p-4 rounded-2xl w-16 h-16 mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                  <Zap className="h-8 w-8 text-green-600 mx-auto" />
+                </div>
+                <h4 className="text-xl font-semibold text-gray-900 mb-2">실시간 미리보기</h4>
+                <p className="text-gray-600">편집과 동시에 최종 결과물을 확인할 수 있는 WYSIWYG</p>
+              </div>
+              
+              <div className="text-center group">
+                <div className="bg-gradient-to-br from-orange-100 to-orange-200 p-4 rounded-2xl w-16 h-16 mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                  <Download className="h-8 w-8 text-orange-600 mx-auto" />
+                </div>
+                <h4 className="text-xl font-semibold text-gray-900 mb-2">PDF 내보내기</h4>
+                <p className="text-gray-600">인쇄 최적화된 고품질 PDF로 바로 내보내기</p>
+              </div>
             </div>
           </div>
-        </div>
+        </section>
+
+        {/* CTA Section */}
+        <section className="relative py-20 bg-gradient-to-r from-blue-600 to-purple-600">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h3 className="text-4xl font-bold text-white mb-6">
+              지금 바로 시작해보세요
+            </h3>
+            <p className="text-xl text-blue-100 mb-8">
+              무료로 한국어 학습 자료를 만들어보세요
+            </p>
+            <Link
+              to="/editor"
+              className="inline-flex items-center bg-white text-blue-600 px-8 py-4 rounded-xl text-lg font-semibold hover:shadow-xl transition-all duration-300 group"
+            >
+              에디터 열기
+              <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+            </Link>
+          </div>
+        </section>
       </main>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-gray-200 mt-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center text-gray-500">
-            <p>&copy; 2024 EduText Pro. All rights reserved.</p>
+      <footer className="bg-gray-900 text-white py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row justify-between items-center">
+            <div className="flex items-center mb-4 md:mb-0">
+              <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-2 rounded-lg">
+                <FileText className="h-5 w-5 text-white" />
+              </div>
+              <span className="ml-2 text-lg font-semibold">원바이트 Print 모드</span>
+            </div>
+            <div className="text-gray-400">
+              <p>&copy; 2025 원바이트. All rights reserved.</p>
+            </div>
           </div>
         </div>
       </footer>
