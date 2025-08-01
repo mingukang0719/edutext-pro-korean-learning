@@ -1,8 +1,2 @@
-[build]
-cmd = "npm install"
-
-[deploy]
-startCommand = "npm start"
-
-[env]
-NODE_ENV = "production"
+# This is now a render.yaml for Render deployment
+# Render uses render.yaml in the root directory

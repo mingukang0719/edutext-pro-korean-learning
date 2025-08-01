@@ -1,0 +1,51 @@
+services:
+  # Backend API
+  - type: web
+    name: onbyte-print-backend
+    env: node
+    region: oregon
+    plan: free
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: SUPABASE_URL
+        fromDatabase:
+          name: supabase-config
+          property: url
+      - key: SUPABASE_ANON_KEY
+        fromDatabase:
+          name: supabase-config
+          property: anon_key
+      - key: API_KEY_ENCRYPTION_SECRET
+        generateValue: true
+      - key: JWT_SECRET
+        generateValue: true
+
+  # Frontend Static Site
+  - type: static
+    name: onbyte-print-frontend
+    env: static
+    region: oregon
+    plan: free
+    buildCommand: npm run build
+    staticPublishPath: ./dist
+    envVars:
+      - key: VITE_API_BASE_URL
+        value: https://onbyte-print-backend.onrender.com/api
+      - key: VITE_SUPABASE_URL
+        fromDatabase:
+          name: supabase-config
+          property: url
+      - key: VITE_SUPABASE_ANON_KEY
+        fromDatabase:
+          name: supabase-config
+          property: anon_key
+
+databases:
+  - name: supabase-config
+    databaseName: config
+    user: config_user

@@ -21,7 +21,7 @@ const supabase = createClient(
 app.use(helmet())
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? ['https://onbyte-print.netlify.app', 'https://edutext-pro.netlify.app'] 
+    ? ['https://onbyte-print.netlify.app', 'https://edutext-pro.netlify.app', 'https://onbyte-print-frontend.onrender.com'] 
     : ['http://localhost:3000', 'http://localhost:5173'],
   credentials: true
 }))
