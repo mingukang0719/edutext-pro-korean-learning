@@ -5,6 +5,9 @@ import helmet from 'helmet'
 import rateLimit from 'express-rate-limit'
 import { createClient } from '@supabase/supabase-js'
 import SupabaseService from './services/supabaseService.js'
+import templateRoutes from './routes/templates.js'
+import aiGenerationRoutes from './routes/aiGeneration.js'
+import { adminAuthMiddleware } from './middleware/adminAuth.js'
 
 // Load environment variables
 dotenv.config()
@@ -293,6 +296,12 @@ app.post('/api/generate', async (req, res) => {
   }
 })
 
+// Template management routes
+app.use('/api/admin/templates', templateRoutes)
+
+// AI generation routes
+app.use('/api/admin/ai', aiGenerationRoutes)
+
 // Admin login endpoint with Supabase integration
 app.post('/api/admin/login', async (req, res) => {
   try {
@@ -321,18 +330,38 @@ app.post('/api/admin/login', async (req, res) => {
 })
 
 // Admin stats endpoint with real Supabase data
-app.get('/api/admin/stats', async (req, res) => {
+app.get('/api/admin/stats', adminAuthMiddleware, async (req, res) => {
   try {
     const stats = await supabaseService.getUsageStats()
+    
+    // Claude 사용 통계 추가
+    const { data: claudeStats } = await supabase
+      .from('ai_generation_logs')
+      .select('ai_provider, tokens_used, cost_estimate')
+      .eq('ai_provider', 'claude')
+      .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
+
+    const claudeUsage = claudeStats?.reduce((acc, log) => ({
+      totalTokens: acc.totalTokens + (log.tokens_used || 0),
+      totalCost: acc.totalCost + (log.cost_estimate || 0),
+      count: acc.count + 1
+    }), { totalTokens: 0, totalCost: 0, count: 0 })
     
     res.json({
       success: true,
       stats: {
         totalGenerations: stats.totalGenerations,
         totalTokens: stats.totalTokens,
-        providerBreakdown: stats.byProvider,
+        providerBreakdown: {
+          ...stats.byProvider,
+          claude: claudeUsage
+        },
         contentTypeBreakdown: stats.byContentType,
-        dailyUsage: stats.dailyUsage
+        dailyUsage: stats.dailyUsage,
+        templates: {
+          total: await supabase.from('reading_templates').select('count'),
+          active: await supabase.from('reading_templates').select('count').eq('is_active', true)
+        }
       }
     })
 

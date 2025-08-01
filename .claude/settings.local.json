@@ -45,7 +45,10 @@
       "Bash(git push:*)",
       "mcp__playwright__browser_wait_for",
       "mcp__playwright__browser_evaluate",
-      "mcp__supabase-mcp__list_projects"
+      "mcp__supabase-mcp__list_projects",
+      "mcp__playwright__browser_close",
+      "mcp__playwright__browser_tab_select",
+      "Bash(curl:*)"
     ],
     "deny": []
   }

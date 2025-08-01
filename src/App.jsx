@@ -3,6 +3,7 @@ import HomePage from './pages/HomePage'
 import EditorPage from './pages/EditorPage'
 import AdminLogin from './pages/AdminLogin'
 import AdminDashboard from './pages/AdminDashboard'
+import AdminDashboardWithRoutes from './pages/AdminDashboardWithRoutes'
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
           <Route path="/editor" element={<EditorPage />} />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/*" element={<AdminDashboardWithRoutes />} />
         </Routes>
       </div>
     </Router>

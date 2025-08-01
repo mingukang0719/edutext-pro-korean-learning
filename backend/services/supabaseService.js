@@ -2,12 +2,19 @@ import { createClient } from '@supabase/supabase-js'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import crypto from 'crypto'
+import dotenv from 'dotenv'
+
+// Load environment variables
+dotenv.config()
 
 class SupabaseService {
   constructor() {
+    // SERVICE_ROLE_KEY가 없으면 ANON_KEY 사용
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
+    
     this.supabase = createClient(
       process.env.SUPABASE_URL,
-      process.env.SUPABASE_SERVICE_ROLE_KEY
+      serviceKey
     )
     this.publicSupabase = createClient(
       process.env.SUPABASE_URL,
